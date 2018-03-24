@@ -35,7 +35,7 @@ CUDA_HOST_DEVICE inline static T CubicSpline(float x, float xk, float xk_1,
 											 T pk, T mk, T pk_1, T mk_1) noexcept {
 	// Compute t
 	float delta = xk_1 - xk;
-	float t = (x - xk) / delta;
+	float t = FMax(x - xk, 0.f) / delta;
 	float t2 = t * t;
 	float t3 = t2 * t;
 	// Compute basis function value

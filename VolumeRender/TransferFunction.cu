@@ -7,6 +7,8 @@ CUDA_HOST_DEVICE TFOutput TF1DCubic::At(const TF1DControlPoint * control_points,
 	while (x > control_points[left_point + 1].value) {
 		++left_point;
 	}
+	// Check we did not go after the last value
+	left_point = Clamp(left_point, 0, num_points - 2);
 
 	// Compute derivatives based on where we are
 	TFOutput mk, mk_1;

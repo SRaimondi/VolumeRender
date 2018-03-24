@@ -8,18 +8,19 @@ class EmptySpaceMap {
 public:
 	template <typename TF_FUNC>
 	static void ProcessScalarField(const ScalarFieldDescription* field, const float* data,
-											 const TF_FUNC* transfer_function,
-											 const TF1DControlPoint* tf_control_points,
-											 bool* empty_space_map,
-											 float tollerance) noexcept;
+								   const TF_FUNC* transfer_function,
+								   const TF1DControlPoint* tf_control_points,
+								   bool* empty_space_map,
+								   float tollerance) noexcept;
 };
 
+// This method could be improved by precomputing the TF value at each vertex and then loop through them
 template <typename TF_FUNC>
 void EmptySpaceMap::ProcessScalarField(const ScalarFieldDescription* field, const float* data,
-														const TF_FUNC* transfer_function,
-														const TF1DControlPoint* tf_control_points,
-														bool* empty_space_map,
-														float tollerance) noexcept {
+									   const TF_FUNC* transfer_function,
+									   const TF1DControlPoint* tf_control_points,
+									   bool* empty_space_map,
+									   float tollerance) noexcept {
 	// Loop over all voxels in the scalar field
 	for (int k = 0; k < field->dims[2] - 1; ++k) {
 		for (int j = 0; j < field->dims[1] - 1; ++j) {
@@ -27,7 +28,7 @@ void EmptySpaceMap::ProcessScalarField(const ScalarFieldDescription* field, cons
 				// Evaluate the transfer function at each vertex of the voxel
 				float tf_vertices[8];
 				for (int v_k = 0; v_k < 2; ++v_k) {
-					for(int v_j = 0; v_j < 2; ++v_j) {
+					for (int v_j = 0; v_j < 2; ++v_j) {
 						for (int v_i = 0; v_i < 2; ++v_i) {
 							tf_vertices[v_i + v_j * 2 + v_k * 4] = field->is_normalized ?
 								// Evaluate transfer function directly

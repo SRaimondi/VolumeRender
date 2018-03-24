@@ -7,8 +7,8 @@
 
 int main(void) {
 	// Create film
-	constexpr int WIDTH = 1024;
-	constexpr int HEIGHT = 1024;
+	constexpr int WIDTH = 800;
+	constexpr int HEIGHT = 800;
 	FilmDescription* film;
 	CUDA_SAFE_CALL(cudaMallocManaged(&film, sizeof(FilmDescription)));
 	*film = FilmDescription(WIDTH, HEIGHT);
@@ -19,7 +19,7 @@ int main(void) {
 	// Create camera
 	Camera* camera;
 	CUDA_SAFE_CALL(cudaMallocManaged(&camera, sizeof(Camera)));
-	*camera = Camera(Vec3(1, 1, 2), Vec3(), Vec3(0, 1, 0), 60.f, 1.5f, WIDTH, HEIGHT);
+	*camera = Camera(Vec3(1, 1, -2), Vec3(), Vec3(0, 1, 0), 60.f, 1.5f, WIDTH, HEIGHT);
 
 	// Load DDS file
 	unsigned char *volume = nullptr;
@@ -44,7 +44,7 @@ int main(void) {
 	float* scalar_field_data;
 	CUDA_SAFE_CALL(cudaMallocManaged(&scalar_field_data, width * height * depth * sizeof(float)));
 
-	// Fill volume data
+	// Fill scalar field from data
 	float sum = 0.f;
 	// Fill scalar field
 	for (unsigned int k = 0; k < depth; ++k) {
@@ -103,7 +103,7 @@ int main(void) {
 	CUDA_SAFE_CALL(cudaMallocManaged(&empty_space_map, (width - 1) * (height - 1) * (depth - 1) * sizeof(bool)));
 	EmptySpaceMap::ProcessScalarField(scalar_field, scalar_field_data,
 									  tf, tf_control_points,
-									  empty_space_map, 0.01f);
+									  empty_space_map, 0.02f);
 
 
 	// Render image

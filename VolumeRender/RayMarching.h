@@ -104,7 +104,7 @@ CUDA_GLOBAL void RayMarchVolumeEmptySpaceMap(
 					// We might get some precision problem, so we need to clamp our travel value
 					(void)BBOX(v_min, v_max).Intersect(ray, voxel_min, voxel_max);
 					// Travel as much as we can
-					t_min += FMax(voxel_max - voxel_min, marching_delta);
+					t_min += FMax(voxel_max - t_min, marching_delta);
 				} else {
 					// Get volume density at current point
 					const float density = field_description->At(field_data, p);
