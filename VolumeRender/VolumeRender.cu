@@ -19,7 +19,7 @@ int main(void) {
 	// Create camera
 	Camera* camera;
 	CUDA_SAFE_CALL(cudaMallocManaged(&camera, sizeof(Camera)));
-	*camera = Camera(Vec3(1, 1, -2), Vec3(), Vec3(0, 1, 0), 60.f, 1.5f, WIDTH, HEIGHT);
+	*camera = Camera(Vec3(1, 1, 2), Vec3(), Vec3(0, 1, 0), 60.f, 1.5f, WIDTH, HEIGHT);
 
 	// Load DDS file
 	unsigned char *volume = nullptr;
@@ -97,14 +97,12 @@ int main(void) {
 	tf->num_points = NUM_CNTRL_POINTS;
 	tf->variance = 0.00001f;
 
-
 	// Compute empty space map
 	bool* empty_space_map;
 	CUDA_SAFE_CALL(cudaMallocManaged(&empty_space_map, (width - 1) * (height - 1) * (depth - 1) * sizeof(bool)));
 	EmptySpaceMap::ProcessScalarField(scalar_field, scalar_field_data,
 									  tf, tf_control_points,
 									  empty_space_map, 0.02f);
-
 
 	// Render image
 	const dim3 block(16, 16);

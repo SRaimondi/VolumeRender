@@ -28,6 +28,13 @@ public:
 		: r(r), g(g), b(b) {
 	}
 
+	CUDA_HOST_DEVICE inline Spectrum &operator+=(const Spectrum &s) noexcept {
+		r += s.r;
+		g += s.g;
+		b += s.b;
+		return *this;
+	}
+
 	CUDA_HOST_DEVICE inline Spectrum &operator*=(const Spectrum &s) noexcept {
 		r *= s.r;
 		g *= s.g;

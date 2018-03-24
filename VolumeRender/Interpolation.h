@@ -17,6 +17,7 @@ CUDA_HOST_DEVICE inline static T Lerp(float t, T a, T b) noexcept {
 }
 
 // Cubic interpolation
+// TODO this should be modified to use references for complex types
 template <typename T>
 CUDA_HOST_DEVICE inline static T CINT_CR(float t, T u0, T u1, T u2, T u3) noexcept {
 	// Evaluate coefficients for points
@@ -30,6 +31,7 @@ CUDA_HOST_DEVICE inline static T CINT_CR(float t, T u0, T u1, T u2, T u3) noexce
 }
 
 // Cubic interpolation for arbitrary interval
+// TODO this should be modified to use references for complex types
 template <typename T>
 CUDA_HOST_DEVICE inline static T CubicSpline(float x, float xk, float xk_1,
 											 T pk, T mk, T pk_1, T mk_1) noexcept {
