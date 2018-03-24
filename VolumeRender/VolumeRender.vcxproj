@@ -21,6 +21,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="DDSLoader.h" />
+    <ClInclude Include="EmptySpaceMap.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="Interpolation.h" />
@@ -32,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSLoader.cpp" />
+    <ClCompile Include="EmptySpaceMap.cpp" />
     <ClCompile Include="LodePng.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -37,6 +37,8 @@ public:
 	BOUND_MODE bound_mode = BOUND_MODE::ZERO;
 	// Maximum and minimum value of the field
 	float field_min, field_max;
+	// Data is normalized
+	bool is_normalized = false;
 
 	// Constructor
 	CUDA_HOST_DEVICE ScalarFieldDescription(int nx, int ny, int nz, const BBOX &bounds,
@@ -105,6 +107,9 @@ public:
 	CUDA_HOST_DEVICE inline bool Intersect(const Ray &ray, float &t_min, float &t_max) const noexcept {
 		return bounds.Intersect(ray, t_min, t_max);
 	}
+
+	// Normalize single value
+	CUDA_HOST_DEVICE float NormalizeVal(float v) const noexcept;
 
 	// Normalize data
 	CUDA_HOST void Normalize(float* data) noexcept;

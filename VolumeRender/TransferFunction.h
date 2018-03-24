@@ -71,6 +71,7 @@ public:
 };
 
 // TF1DExp takes as input the scalar field value, in the range [0,1] and outputs a density and attenuation color based on exponential functions at the control points
+// Care that this TF is NOT in C1!!!
 class TF1DExp {
 public:
 	// Number of points in the TF

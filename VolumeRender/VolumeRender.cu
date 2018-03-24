@@ -1,6 +1,7 @@
 #include "DDSLoader.h"
 #include "RayMarching.h"
 #include "TransferFunction.h"
+#include "EmptySpaceMap.h"
 
 #include <iostream>
 
@@ -62,15 +63,13 @@ int main(void) {
 	std::cout << "Min value: " << scalar_field->field_min << std::endl;
 
 	// Normalize data
-	scalar_field->Normalize(scalar_field_data);
+	// scalar_field->Normalize(scalar_field_data);
+	scalar_field->UpdateMinMax(scalar_field_data);
 
-	//if (Approx(density, 1.7, 0.6)) {
-	//	L *= Exp(-3 * density * marching_delta * sigma_a[0]);
-	//} else if (Approx(density, 0.6, 0.2)) {
-	//	L *= Exp(-3 * density * marching_delta * sigma_a[1]);
-	//} else if (Approx(density, 1, 0.2)) {
-	//	L *= Exp(-3 * density * marching_delta * sigma_a[2]);
-	//}
+	// Compute empty space map
+	bool* empty_space_map;
+	CUDA_SAFE_CALL(cudaMallocManaged(&empty_space_map, (width - 1) * (height - 1) * (depth - 1) * sizeof(bool)));
+	EmptySpaceMap::ProcessScalarField(scalar_field, scalar_field_data, empty_space_map, 0.01f);
 
 
 	TF1DControlPoint* tf_control_points;
@@ -133,6 +132,8 @@ int main(void) {
 	film->CreatePNG(film_raster, "render.png");
 
 	// Free resources
+	CUDA_SAFE_CALL(cudaFree(tf));
+	CUDA_SAFE_CALL(cudaFree(tf_control_points));
 	CUDA_SAFE_CALL(cudaFree(film));
 	CUDA_SAFE_CALL(cudaFree(film_raster));
 	CUDA_SAFE_CALL(cudaFree(camera));

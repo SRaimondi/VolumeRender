@@ -98,11 +98,16 @@ CUDA_HOST void ScalarFieldDescription::UpdateMinMax(const float * data) noexcept
 	}
 }
 
+CUDA_HOST_DEVICE float ScalarFieldDescription::NormalizeVal(float v) const noexcept {
+	return (v - field_min) / (field_max - field_min);
+}
+
 CUDA_HOST void ScalarFieldDescription::Normalize(float * data) noexcept {
 	// Update max and minimum
 	UpdateMinMax(data);
 	// Loop over data and normalize it
-	for (int i = 0, float delta = field_max - field_min; i < dims[0] * dims[1] * dims[2]; ++i) {
-		data[i] = (data[i] - field_min) / delta;
+	for (int i = 0; i < dims[0] * dims[1] * dims[2]; ++i) {
+		data[i] = NormalizeVal(data[i]);
 	}
+	is_normalized = true;
 }
