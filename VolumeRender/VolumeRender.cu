@@ -63,14 +63,7 @@ int main(void) {
 	std::cout << "Min value: " << scalar_field->field_min << std::endl;
 
 	// Normalize data
-	// scalar_field->Normalize(scalar_field_data);
-	scalar_field->UpdateMinMax(scalar_field_data);
-
-	// Compute empty space map
-	bool* empty_space_map;
-	CUDA_SAFE_CALL(cudaMallocManaged(&empty_space_map, (width - 1) * (height - 1) * (depth - 1) * sizeof(bool)));
-	EmptySpaceMap::ProcessScalarField(scalar_field, scalar_field_data, empty_space_map, 0.01f);
-
+	scalar_field->Normalize(scalar_field_data);
 
 	TF1DControlPoint* tf_control_points;
 	const Spectrum sigma_a[3] = {
@@ -105,6 +98,14 @@ int main(void) {
 	tf->variance = 0.00001f;
 
 
+	// Compute empty space map
+	bool* empty_space_map;
+	CUDA_SAFE_CALL(cudaMallocManaged(&empty_space_map, (width - 1) * (height - 1) * (depth - 1) * sizeof(bool)));
+	EmptySpaceMap::ProcessScalarField(scalar_field, scalar_field_data,
+									  tf, tf_control_points,
+									  empty_space_map, 0.01f);
+
+
 	// Render image
 	const dim3 block(16, 16);
 	const dim3 grid(DivUp(WIDTH, block.x), DivUp(HEIGHT, block.y));
@@ -115,11 +116,19 @@ int main(void) {
 
 	constexpr float MARCHING_STEP = 0.001f;
 	cudaEventRecord(start, 0);
-	RayMarchVolume KERNEL_ARGS2(grid, block)(scalar_field, scalar_field_data,
-											 camera, 
-											 film, film_raster,
-											 MARCHING_STEP,
-											 tf, tf_control_points);
+	//RayMarchVolume KERNEL_ARGS2(grid, block)(scalar_field, scalar_field_data,
+	//										 camera, 
+	//										 film, film_raster,
+	//										 MARCHING_STEP,
+	//										 tf, tf_control_points);
+
+	RayMarchVolumeEmptySpaceMap KERNEL_ARGS2(grid, block) (scalar_field, scalar_field_data,
+														   empty_space_map,
+														   camera,
+														   film, film_raster,
+														   MARCHING_STEP,
+														   tf, tf_control_points);
+
 	cudaEventRecord(stop, 0);
 	// Wait for stop event
 	cudaEventSynchronize(stop);
@@ -132,6 +141,7 @@ int main(void) {
 	film->CreatePNG(film_raster, "render.png");
 
 	// Free resources
+	CUDA_SAFE_CALL(cudaFree(empty_space_map));
 	CUDA_SAFE_CALL(cudaFree(tf));
 	CUDA_SAFE_CALL(cudaFree(tf_control_points));
 	CUDA_SAFE_CALL(cudaFree(film));

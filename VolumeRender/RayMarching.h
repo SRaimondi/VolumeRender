@@ -59,7 +59,7 @@ CUDA_GLOBAL void RayMarchVolume(
 
 // Ray march scalar field using empty space map
 template <typename TF_FUNC>
-CUDA_GLOBAL void RayMarchVolumeMap(
+CUDA_GLOBAL void RayMarchVolumeEmptySpaceMap(
 	const ScalarFieldDescription* field_description,	// Description of the scalar field to render
 	const float* field_data,							// Actual field data
 	const bool* empty_space_map,                        // Empty space map
@@ -99,11 +99,19 @@ CUDA_GLOBAL void RayMarchVolumeMap(
 									 field_description->bounds[0].y + v_i[1] * field_description->voxel_dim.y,
 									 field_description->bounds[0].z + v_i[2] * field_description->voxel_dim.z);
 					const Vec3 v_max = v_min + field_description->voxel_dim;
+					// Compute in and out value for the voxel
+					float voxel_min, voxel_max;
+					// We might get some precision problem, so we need to clamp our travel value
+					(void)BBOX(v_min, v_max).Intersect(ray, voxel_min, voxel_max);
+					// Travel as much as we can
+					t_min += FMax(voxel_max - voxel_min, marching_delta);
 				} else {
 					// Get volume density at current point
 					const float density = field_description->At(field_data, p);
 					// Evaluate transfer function
-					const TFOutput tf_value = transfer_function->At(tf_control_points, density);
+					const TFOutput tf_value = field_description->is_normalized ?
+						transfer_function->At(tf_control_points, density) :
+						transfer_function->At(tf_control_points, field_description->NormalizeVal(density));
 					// Compute integral
 					L *= Exp(-tf_value.density * marching_delta * tf_value.attenuation);
 					// Next step

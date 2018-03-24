@@ -33,7 +33,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSLoader.cpp" />
-    <ClCompile Include="EmptySpaceMap.cpp" />
     <ClCompile Include="LodePng.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
