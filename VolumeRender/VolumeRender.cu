@@ -72,12 +72,23 @@ int main(void) {
 	//	L *= Exp(-3 * density * marching_delta * sigma_a[2]);
 	//}
 
+	const Spectrum sigma_a[3] = { Spectrum(0.1, 0.7, 0.1),
+		Spectrum(0.2, 0.3, 0.7),
+		Spectrum(0.1, 0.1, 0.5) };
+
 	// Create transfer function
-	TF1DControlPoint control_points[2];
-	control_points[0] = TF1DControlPoint(0.f, Spectrum(1.f, 0.f, 0.f), 1.f);
-	control_points[1] = TF1DControlPoint(1.f, Spectrum(1.f, 0.f, 0.f), 1.f);
-	TF1D tf(2);
-	TFOutput output = tf.At(control_points, 0.1f);
+	constexpr int NUM_CNTRL_POINTS = 5;
+	TF1DControlPoint* control_points;
+	CUDA_SAFE_CALL(cudaMallocManaged(&control_points, NUM_CNTRL_POINTS * sizeof(TF1DControlPoint)));
+	control_points[0] = TF1DControlPoint(0.f, Spectrum(0.f, 0.f, 0.f), 0.f);
+	control_points[1] = TF1DControlPoint(0.06f, sigma_a[1], 1.f);
+	control_points[2] = TF1DControlPoint(0.1f, sigma_a[2], 1.f);
+	control_points[3] = TF1DControlPoint(0.17f, sigma_a[0], 1.f);
+	control_points[4] = TF1DControlPoint(1.f, Spectrum(0.f, 0.f, 0.f), 0.f);
+	
+	TF1D* tf;
+	CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1D)));
+	tf->num_points = NUM_CNTRL_POINTS;
 
 	// Render image
 	const dim3 block(8, 32);
