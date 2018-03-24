@@ -55,12 +55,12 @@ struct TF1DControlPoint {
 };
 
 // The TransferFunction1D takes as input the scalar field value, in the range [0, 1], and outputs a density and attenuation color
-class TF1D {
+class TF1DCubic {
 public:
 	// Number of points in the TF
 	int num_points;
 
-	CUDA_HOST TF1D(int n_p)
+	CUDA_HOST TF1DCubic(int n_p)
 		: num_points(n_p) {
 		assert(num_points >= 2);
 	}

@@ -7,7 +7,7 @@ CUDA_GLOBAL void RayMarchVolume(
 	const FilmDescription* film_description,
 	Spectrum* film_raster,
 	float marching_delta,
-	const TF1D* transfer_function,
+	const TF1DCubic* transfer_function,
 	const TF1DControlPoint* tf_control_points) {
 	// Get thread ids
 	const volatile unsigned idx = threadIdx.x + blockIdx.x * blockDim.x;

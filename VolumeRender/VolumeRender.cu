@@ -83,11 +83,11 @@ int main(void) {
 	tf_control_points[0] = TF1DControlPoint(0.f, Spectrum(0.f, 0.f, 0.f), 0.f);
 	tf_control_points[1] = TF1DControlPoint(0.06f, sigma_a[1], 1.f);
 	tf_control_points[2] = TF1DControlPoint(0.1f, sigma_a[2], 1.f);
-	tf_control_points[3] = TF1DControlPoint(0.17f, sigma_a[0], 1.f);
+	tf_control_points[3] = TF1DControlPoint(0.17f, sigma_a[0], 2.f);
 	tf_control_points[4] = TF1DControlPoint(1.f, Spectrum(0.f, 0.f, 0.f), 0.f);
 	
-	TF1D* tf;
-	CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1D)));
+	TF1DCubic* tf;
+	CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1DCubic)));
 	tf->num_points = NUM_CNTRL_POINTS;
 
 	// Render image
@@ -98,7 +98,7 @@ int main(void) {
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
 
-	constexpr float MARCHING_STEP = 0.001f;
+	constexpr float MARCHING_STEP = 0.01f;
 	cudaEventRecord(start, 0);
 	RayMarchVolume KERNEL_ARGS2(grid, block)(scalar_field, scalar_field_data,
 											 camera, 

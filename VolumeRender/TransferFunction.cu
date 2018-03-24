@@ -1,7 +1,7 @@
 #include "TransferFunction.h"
 #include "Interpolation.h"
 
-CUDA_HOST_DEVICE TFOutput TF1D::At(const TF1DControlPoint * control_points, float x) const noexcept {
+CUDA_HOST_DEVICE TFOutput TF1DCubic::At(const TF1DControlPoint * control_points, float x) const noexcept {
 	// First, find the indices of the left point for our interval
 	int left_point = 0;
 	while (x > control_points[left_point + 1].value) {

@@ -21,7 +21,7 @@ CUDA_GLOBAL void RayMarchVolume(
 	const FilmDescription* film_description,			// Description of the film used
 	Spectrum* film_raster,								// Film raster
 	float marching_delta,								// Step to use in the marching process
-	const TF1D* transfer_function,                      // Transfer function
+	const TF1DCubic* transfer_function,                      // Transfer function
 	const TF1DControlPoint* tf_control_points           //Transfer function control points
 );
 
