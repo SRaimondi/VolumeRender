@@ -10,6 +10,8 @@
 
 #include "Common.h"
 
+// Code taken from V^3 library to load PVM file
+
 unsigned char *readPVMvolume(const char *filename,
 							 unsigned int *width, unsigned int *height,
 							 unsigned int *depth, unsigned int *components = nullptr,
@@ -22,7 +24,5 @@ unsigned char *readPVMvolume(const char *filename,
 unsigned char *readDDSfile(const char *filename, unsigned int *bytes);
 
 unsigned char *readRAWfile(const char *filename, unsigned int *bytes);
-
-void writeRAWfile(const char *filename, unsigned char *data, unsigned int bytes, bool nofree = false);
 
 #endif /* DDS_LOADER_H_ */

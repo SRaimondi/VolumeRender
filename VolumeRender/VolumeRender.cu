@@ -6,8 +6,8 @@
 
 int main(void) {
 	// Create film
-	constexpr int WIDTH = 512;
-	constexpr int HEIGHT = 512;
+	constexpr int WIDTH = 1024;
+	constexpr int HEIGHT = 1024;
 	FilmDescription* film;
 	CUDA_SAFE_CALL(cudaMallocManaged(&film, sizeof(FilmDescription)));
 	*film = FilmDescription(WIDTH, HEIGHT);
@@ -72,33 +72,49 @@ int main(void) {
 	//	L *= Exp(-3 * density * marching_delta * sigma_a[2]);
 	//}
 
-	const Spectrum sigma_a[3] = { Spectrum(0.1, 0.7, 0.1),
-		Spectrum(0.2, 0.3, 0.7),
-		Spectrum(0.1, 0.1, 0.5) };
 
-	// Create transfer function
-	constexpr int NUM_CNTRL_POINTS = 5;
 	TF1DControlPoint* tf_control_points;
+	const Spectrum sigma_a[3] = {
+		Spectrum(1) - Spectrum(0.1, 0.7, 0.1),
+		Spectrum(1) - Spectrum(0.2, 0.3, 0.7),
+		Spectrum(1) - Spectrum(0.1, 0.1, 0.5) };
+
+
+	// Create cubic transfer function
+	//constexpr int NUM_CNTRL_POINTS = 5;
+	//CUDA_SAFE_CALL(cudaMallocManaged(&tf_control_points, NUM_CNTRL_POINTS * sizeof(TF1DControlPoint)));
+	//tf_control_points[0] = TF1DControlPoint(0.f, Spectrum(0.f, 0.6f, 0.6f), 0.5f);
+	//tf_control_points[1] = TF1DControlPoint(0.06f, sigma_a[1], 1.f);
+	//tf_control_points[2] = TF1DControlPoint(0.1f, sigma_a[2], 1.f);
+	//tf_control_points[3] = TF1DControlPoint(0.17f, sigma_a[0], 2.f);
+	//tf_control_points[4] = TF1DControlPoint(1.f, Spectrum(0.f, 0.6f, 0.6f), 0.5f);
+	//
+	//TF1DCubic* tf;
+	//CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1DCubic)));
+	//tf->num_points = NUM_CNTRL_POINTS;
+
+	// Create exponential transfer function
+	constexpr int NUM_CNTRL_POINTS = 3;
 	CUDA_SAFE_CALL(cudaMallocManaged(&tf_control_points, NUM_CNTRL_POINTS * sizeof(TF1DControlPoint)));
-	tf_control_points[0] = TF1DControlPoint(0.f, Spectrum(0.f, 0.f, 0.f), 0.f);
-	tf_control_points[1] = TF1DControlPoint(0.06f, sigma_a[1], 1.f);
-	tf_control_points[2] = TF1DControlPoint(0.1f, sigma_a[2], 1.f);
-	tf_control_points[3] = TF1DControlPoint(0.17f, sigma_a[0], 2.f);
-	tf_control_points[4] = TF1DControlPoint(1.f, Spectrum(0.f, 0.f, 0.f), 0.f);
-	
-	TF1DCubic* tf;
-	CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1DCubic)));
+	tf_control_points[0] = TF1DControlPoint(0.06f, sigma_a[1], 4.f);
+	tf_control_points[1] = TF1DControlPoint(0.1f, sigma_a[2], 4.f);
+	tf_control_points[2] = TF1DControlPoint(0.17f, sigma_a[0], 4.f);
+
+	TF1DExp* tf;
+	CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1DExp)));
 	tf->num_points = NUM_CNTRL_POINTS;
+	tf->variance = 0.00001f;
+
 
 	// Render image
-	const dim3 block(8, 32);
+	const dim3 block(16, 16);
 	const dim3 grid(DivUp(WIDTH, block.x), DivUp(HEIGHT, block.y));
 
 	cudaEvent_t start, stop;
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
 
-	constexpr float MARCHING_STEP = 0.01f;
+	constexpr float MARCHING_STEP = 0.001f;
 	cudaEventRecord(start, 0);
 	RayMarchVolume KERNEL_ARGS2(grid, block)(scalar_field, scalar_field_data,
 											 camera, 

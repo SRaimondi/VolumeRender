@@ -13,7 +13,6 @@
   <ItemGroup>
     <CudaCompile Include="Camera.cu" />
     <CudaCompile Include="Film.cu" />
-    <CudaCompile Include="RayMarching.cu" />
     <CudaCompile Include="ScalarField.cu" />
     <CudaCompile Include="TransferFunction.cu" />
     <CudaCompile Include="VolumeRender.cu" />

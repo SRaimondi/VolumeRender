@@ -54,7 +54,8 @@ struct TF1DControlPoint {
 	}
 };
 
-// The TransferFunction1D takes as input the scalar field value, in the range [0, 1], and outputs a density and attenuation color
+// TF1DCubic takes as input the scalar field value, in the range [0, 1], and outputs a density and attenuation color based on a cubic spline
+// interpolation of the control points
 class TF1DCubic {
 public:
 	// Number of points in the TF
@@ -63,6 +64,22 @@ public:
 	CUDA_HOST TF1DCubic(int n_p)
 		: num_points(n_p) {
 		assert(num_points >= 2);
+	}
+
+	// Compute transfer function value at given parameter in [0,1]
+	CUDA_HOST_DEVICE TFOutput At(const TF1DControlPoint* control_points, float x) const noexcept;
+};
+
+// TF1DExp takes as input the scalar field value, in the range [0,1] and outputs a density and attenuation color based on exponential functions at the control points
+class TF1DExp {
+public:
+	// Number of points in the TF
+	int num_points;
+	// c^2 parameter for Gaussian, square root of variance
+	float variance;
+
+	CUDA_HOST TF1DExp(int n_p, float var_sqr)
+		: num_points(n_p), variance(var_sqr * var_sqr) {
 	}
 
 	// Compute transfer function value at given parameter in [0,1]
