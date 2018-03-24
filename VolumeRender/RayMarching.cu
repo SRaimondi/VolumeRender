@@ -6,7 +6,9 @@ CUDA_GLOBAL void RayMarchVolume(
 	const Camera* camera,
 	const FilmDescription* film_description,
 	Spectrum* film_raster,
-	float marching_delta) {
+	float marching_delta,
+	const TF1D* transfer_function,
+	const TF1DControlPoint* tf_control_points) {
 	// Get thread ids
 	const volatile unsigned idx = threadIdx.x + blockIdx.x * blockDim.x;
 	const volatile unsigned idy = threadIdx.y + blockIdx.y * blockDim.y;
@@ -17,11 +19,6 @@ CUDA_GLOBAL void RayMarchVolume(
 		// Incoming radiance value for the ray
 		Spectrum L(1.f);
 
-		// Hardcoded "transfer function"
-		const Spectrum sigma_a[3] = { Spectrum(0.1, 0.7, 0.1),
-			Spectrum(0.2, 0.3, 0.7),
-			Spectrum(0.1, 0.1, 0.5) };
-
 		// Minimum and maximum intersection parameters of the ray with BBOX
 		float t_min, t_max;
 		if (field_description->Intersect(ray, t_min, t_max)) {
@@ -29,14 +26,10 @@ CUDA_GLOBAL void RayMarchVolume(
 			while (t_min <= t_max) {
 				// Get volume density at current point
 				const float density = field_description->At(field_data, ray(t_min));
-				// Attenuate color based on density and transfer function TODO
-				if (Approx(density, 0.17, 0.6)) {
-					L *= Exp(-3 * density * marching_delta * (Spectrum(1) - sigma_a[0]));
-				} else if (Approx(density, 0.06, 0.2)) {
-					L *= Exp(-3 * density * marching_delta * (Spectrum(1) - sigma_a[1]));
-				} else if (Approx(density, 0.1, 0.2)) {
-					L *= Exp(-3 * density * marching_delta * (Spectrum(1) - sigma_a[2]));
-				}
+				// Evaluate transfer function
+				const TFOutput tf_value = transfer_function->At(tf_control_points, density);
+				// Compute integral
+				L *= Exp(-tf_value.density * marching_delta * tf_value.attenuation);
 				// Next step
 				t_min += marching_delta;
 			}

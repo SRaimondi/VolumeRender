@@ -78,13 +78,13 @@ int main(void) {
 
 	// Create transfer function
 	constexpr int NUM_CNTRL_POINTS = 5;
-	TF1DControlPoint* control_points;
-	CUDA_SAFE_CALL(cudaMallocManaged(&control_points, NUM_CNTRL_POINTS * sizeof(TF1DControlPoint)));
-	control_points[0] = TF1DControlPoint(0.f, Spectrum(0.f, 0.f, 0.f), 0.f);
-	control_points[1] = TF1DControlPoint(0.06f, sigma_a[1], 1.f);
-	control_points[2] = TF1DControlPoint(0.1f, sigma_a[2], 1.f);
-	control_points[3] = TF1DControlPoint(0.17f, sigma_a[0], 1.f);
-	control_points[4] = TF1DControlPoint(1.f, Spectrum(0.f, 0.f, 0.f), 0.f);
+	TF1DControlPoint* tf_control_points;
+	CUDA_SAFE_CALL(cudaMallocManaged(&tf_control_points, NUM_CNTRL_POINTS * sizeof(TF1DControlPoint)));
+	tf_control_points[0] = TF1DControlPoint(0.f, Spectrum(0.f, 0.f, 0.f), 0.f);
+	tf_control_points[1] = TF1DControlPoint(0.06f, sigma_a[1], 1.f);
+	tf_control_points[2] = TF1DControlPoint(0.1f, sigma_a[2], 1.f);
+	tf_control_points[3] = TF1DControlPoint(0.17f, sigma_a[0], 1.f);
+	tf_control_points[4] = TF1DControlPoint(1.f, Spectrum(0.f, 0.f, 0.f), 0.f);
 	
 	TF1D* tf;
 	CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1D)));
@@ -98,8 +98,13 @@ int main(void) {
 	cudaEventCreate(&start);
 	cudaEventCreate(&stop);
 
+	constexpr float MARCHING_STEP = 0.001f;
 	cudaEventRecord(start, 0);
-	RayMarchVolume KERNEL_ARGS2(grid, block)(scalar_field, scalar_field_data, camera, film, film_raster, 0.001f);
+	RayMarchVolume KERNEL_ARGS2(grid, block)(scalar_field, scalar_field_data,
+											 camera, 
+											 film, film_raster,
+											 MARCHING_STEP,
+											 tf, tf_control_points);
 	cudaEventRecord(stop, 0);
 	// Wait for stop event
 	cudaEventSynchronize(stop);
