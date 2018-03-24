@@ -38,7 +38,7 @@ public:
 	// Maximum and minimum value of the field
 	float field_min, field_max;
 	// Data is normalized
-	bool is_normalized = false;
+	// bool is_normalized = false;
 
 	// Constructor
 	CUDA_HOST_DEVICE ScalarFieldDescription(int nx, int ny, int nz, const BBOX &bounds,
@@ -100,13 +100,13 @@ public:
 		}
 	}
 
-	// Update maximum and minimum of the field
-	CUDA_HOST void UpdateMinMax(const float* data) noexcept;
-
 	// Intersect ray with the volume BBOX
 	CUDA_HOST_DEVICE inline bool Intersect(const Ray &ray, float &t_min, float &t_max) const noexcept {
 		return bounds.Intersect(ray, t_min, t_max);
 	}
+
+	// Update maximum and minimum of the field
+	CUDA_HOST void UpdateMinMax(const float* data) noexcept;
 
 	// Normalize single value
 	CUDA_HOST_DEVICE float NormalizeVal(float v) const noexcept;

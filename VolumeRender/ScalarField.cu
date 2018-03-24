@@ -109,5 +109,5 @@ CUDA_HOST void ScalarFieldDescription::Normalize(float * data) noexcept {
 	for (int i = 0; i < dims[0] * dims[1] * dims[2]; ++i) {
 		data[i] = NormalizeVal(data[i]);
 	}
-	is_normalized = true;
+	// is_normalized = true;
 }

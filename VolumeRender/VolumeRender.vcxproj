@@ -24,6 +24,7 @@
     <ClInclude Include="EmptySpaceMap.h" />
     <ClInclude Include="Film.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="Histogram.h" />
     <ClInclude Include="Interpolation.h" />
     <ClInclude Include="LodePng.h" />
     <ClInclude Include="RayMarching.h" />
@@ -33,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DDSLoader.cpp" />
+    <ClCompile Include="Histogram.cpp" />
     <ClCompile Include="LodePng.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

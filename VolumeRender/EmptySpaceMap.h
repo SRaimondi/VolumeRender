@@ -15,6 +15,7 @@ public:
 };
 
 // This method could be improved by precomputing the TF value at each vertex and then loop through them
+// We assume the data has been normalized
 template <typename TF_FUNC>
 void EmptySpaceMap::ProcessScalarField(const ScalarFieldDescription* field, const float* data,
 									   const TF_FUNC* transfer_function,
@@ -30,11 +31,12 @@ void EmptySpaceMap::ProcessScalarField(const ScalarFieldDescription* field, cons
 				for (int v_k = 0; v_k < 2; ++v_k) {
 					for (int v_j = 0; v_j < 2; ++v_j) {
 						for (int v_i = 0; v_i < 2; ++v_i) {
-							tf_vertices[v_i + v_j * 2 + v_k * 4] = field->is_normalized ?
+							tf_vertices[v_i + v_j * 2 + v_k * 4] = transfer_function->At(tf_control_points, (*field)(data, i + v_i, j + v_j, k + v_k)).density;
+								/* field->is_normalized ?
 								// Evaluate transfer function directly
 								transfer_function->At(tf_control_points, (*field)(data, i + v_i, j + v_j, k + v_k)).density :
 								// Evaluate transfer function after normalizing value
-								transfer_function->At(tf_control_points, field->NormalizeVal((*field)(data, i + v_i, j + v_j, k + v_k))).density;
+								transfer_function->At(tf_control_points, field->NormalizeVal((*field)(data, i + v_i, j + v_j, k + v_k))).density; */
 						}
 					}
 				}

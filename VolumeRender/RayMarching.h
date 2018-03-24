@@ -17,7 +17,7 @@
 template <typename TF_FUNC>
 CUDA_GLOBAL void RayMarchVolume(
 	const ScalarFieldDescription* field_description,	// Description of the scalar field to render
-	const float* field_data,							// Actual field data
+	const float* field_data,							// Actual field data, assumed to be normalized
 	const Camera* camera,								// Camera to use
 	const FilmDescription* film_description,			// Description of the film used
 	Spectrum* film_raster,								// Film raster
@@ -43,10 +43,11 @@ CUDA_GLOBAL void RayMarchVolume(
 				// Get volume density at current point
 				float density = field_description->At(field_data, ray(t_min));
 				// Evaluate transfer function
-				const TFOutput tf_value = field_description->is_normalized ?
-					transfer_function->At(tf_control_points, density) :
-					transfer_function->At(tf_control_points, field_description->NormalizeVal(density));
-				// Compute integral
+				//const TFOutput tf_value = field_description->is_normalized ?
+				//	transfer_function->At(tf_control_points, density) :
+				//	transfer_function->At(tf_control_points, field_description->NormalizeVal(density));
+				const TFOutput tf_value = transfer_function->At(tf_control_points, density);
+				// Compute integral step
 				L *= Exp(-tf_value.density * marching_delta * tf_value.attenuation);
 				// Next step
 				t_min += marching_delta;
@@ -61,7 +62,7 @@ CUDA_GLOBAL void RayMarchVolume(
 template <typename TF_FUNC>
 CUDA_GLOBAL void RayMarchVolumeEmptySpaceMap(
 	const ScalarFieldDescription* field_description,	// Description of the scalar field to render
-	const float* field_data,							// Actual field data
+	const float* field_data,							// Actual field data, assumed to be normalized
 	const bool* empty_space_map,                        // Empty space map
 	const Camera* camera,								// Camera to use
 	const FilmDescription* film_description,			// Description of the film used
@@ -109,10 +110,11 @@ CUDA_GLOBAL void RayMarchVolumeEmptySpaceMap(
 					// Get volume density at current point
 					const float density = field_description->At(field_data, p);
 					// Evaluate transfer function
-					const TFOutput tf_value = field_description->is_normalized ?
-						transfer_function->At(tf_control_points, density) :
-						transfer_function->At(tf_control_points, field_description->NormalizeVal(density));
-					// Compute integral
+					//const TFOutput tf_value = field_description->is_normalized ?
+					//	transfer_function->At(tf_control_points, density) :
+					//	transfer_function->At(tf_control_points, field_description->NormalizeVal(density));
+					const TFOutput tf_value = transfer_function->At(tf_control_points, density);
+					// Compute integral step
 					L *= Exp(-tf_value.density * marching_delta * tf_value.attenuation);
 					// Next step
 					t_min += marching_delta;

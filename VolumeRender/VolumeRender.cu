@@ -2,6 +2,7 @@
 #include "RayMarching.h"
 #include "TransferFunction.h"
 #include "EmptySpaceMap.h"
+#include "Histogram.h"
 
 #include <iostream>
 
@@ -19,13 +20,13 @@ int main(void) {
 	// Create camera
 	Camera* camera;
 	CUDA_SAFE_CALL(cudaMallocManaged(&camera, sizeof(Camera)));
-	*camera = Camera(Vec3(1, 1, 2), Vec3(), Vec3(0, 1, 0), 60.f, 1.5f, WIDTH, HEIGHT);
+	*camera = Camera(Vec3(2, 1, 2), Vec3(), Vec3(1, 0, 0), 60.f, 2.f, WIDTH, HEIGHT);
 
 	// Load DDS file
 	unsigned char *volume = nullptr;
 	unsigned int width, height, depth, components;
 	Vec3 scale;
-	if ((volume = readPVMvolume("../Bucky.pvm",
+	if ((volume = readPVMvolume("../Daisy.pvm",
 								&width, &height, &depth,
 								&components,
 								&scale.x, &scale.y, &scale.z)) == nullptr) {
@@ -65,11 +66,16 @@ int main(void) {
 	// Normalize data
 	scalar_field->Normalize(scalar_field_data);
 
+	// Create histogram
+	Histogram histogram = GenerateHistogram(scalar_field, scalar_field_data, 50);
+	histogram.Print();
+
+	// Transfer function
 	TF1DControlPoint* tf_control_points;
 	const Spectrum sigma_a[3] = {
 		Spectrum(1) - Spectrum(0.1, 0.7, 0.1),
 		Spectrum(1) - Spectrum(0.2, 0.3, 0.7),
-		Spectrum(1) - Spectrum(0.1, 0.1, 0.5) };
+		Spectrum(1) - Spectrum(0.7, 0.1, 0.2) };
 
 
 	// Create cubic transfer function
@@ -86,16 +92,16 @@ int main(void) {
 	//tf->num_points = NUM_CNTRL_POINTS;
 
 	// Create exponential transfer function
-	constexpr int NUM_CNTRL_POINTS = 3;
+	constexpr int NUM_CNTRL_POINTS = 2;
 	CUDA_SAFE_CALL(cudaMallocManaged(&tf_control_points, NUM_CNTRL_POINTS * sizeof(TF1DControlPoint)));
-	tf_control_points[0] = TF1DControlPoint(0.06f, sigma_a[1], 4.f);
-	tf_control_points[1] = TF1DControlPoint(0.1f, sigma_a[2], 4.f);
-	tf_control_points[2] = TF1DControlPoint(0.17f, sigma_a[0], 4.f);
+	tf_control_points[0] = TF1DControlPoint(0.13f, sigma_a[1], 10.f);
+	tf_control_points[1] = TF1DControlPoint(0.51f, sigma_a[2], 10.f);
+	// tf_control_points[2] = TF1DControlPoint(0.51f, sigma_a[0], 10.f);
 
 	TF1DExp* tf;
 	CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1DExp)));
 	tf->num_points = NUM_CNTRL_POINTS;
-	tf->variance = 0.00001f;
+	tf->variance = 0.001f;
 
 	// Compute empty space map
 	bool* empty_space_map;
