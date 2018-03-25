@@ -11,7 +11,7 @@ CUDA_HOST void Histogram::Print() const noexcept {
 		//for (int n = 0; n < histogram_data[i] / 100; ++n) {
 		//	std::cout << "x";
 		//}
-		std::cout << std::endl;
+		//std::cout << std::endl;
 	}
 }
 

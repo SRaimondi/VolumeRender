@@ -45,7 +45,7 @@ CUDA_HOST_DEVICE TFOutput TF1DExp::At(const TF1DControlPoint * control_points, f
 	Spectrum attenuation;
 	for (int peek = 0; peek < num_points; ++peek) {
 		float x_b = x - control_points[peek].value;
-		float d = control_points[peek].output.density * std::exp(-0.5f * x_b * x_b / variance);
+		float d = control_points[peek].output.density * std::exp(-0.5f * x_b * x_b / control_points[peek].variance);
 		attenuation += d * control_points[peek].output.attenuation;
 	}
 

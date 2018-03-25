@@ -20,13 +20,13 @@ int main(void) {
 	// Create camera
 	Camera* camera;
 	CUDA_SAFE_CALL(cudaMallocManaged(&camera, sizeof(Camera)));
-	*camera = Camera(Vec3(2, 1, 2), Vec3(), Vec3(1, 0, 0), 60.f, 2.f, WIDTH, HEIGHT);
+	*camera = Camera(Vec3(1, 1.5, 2), Vec3(), Vec3(0, 1, 0), 60.f, 1.5f, WIDTH, HEIGHT);
 
 	// Load DDS file
 	unsigned char *volume = nullptr;
 	unsigned int width, height, depth, components;
 	Vec3 scale;
-	if ((volume = readPVMvolume("../Daisy.pvm",
+	if ((volume = readPVMvolume("../Bucky.pvm",
 								&width, &height, &depth,
 								&components,
 								&scale.x, &scale.y, &scale.z)) == nullptr) {
@@ -72,10 +72,11 @@ int main(void) {
 
 	// Transfer function
 	TF1DControlPoint* tf_control_points;
-	const Spectrum sigma_a[3] = {
+	const Spectrum sigma_a[4] = {
 		Spectrum(1) - Spectrum(0.1, 0.7, 0.1),
 		Spectrum(1) - Spectrum(0.2, 0.3, 0.7),
-		Spectrum(1) - Spectrum(0.7, 0.1, 0.2) };
+		Spectrum(1) - Spectrum(0.7, 0.1, 0.2),
+		Spectrum(1) - Spectrum(0.1, 0.9, 0.2) };
 
 
 	// Create cubic transfer function
@@ -92,16 +93,16 @@ int main(void) {
 	//tf->num_points = NUM_CNTRL_POINTS;
 
 	// Create exponential transfer function
-	constexpr int NUM_CNTRL_POINTS = 2;
+	constexpr int NUM_CNTRL_POINTS = 4;
 	CUDA_SAFE_CALL(cudaMallocManaged(&tf_control_points, NUM_CNTRL_POINTS * sizeof(TF1DControlPoint)));
-	tf_control_points[0] = TF1DControlPoint(0.13f, sigma_a[1], 10.f);
-	tf_control_points[1] = TF1DControlPoint(0.51f, sigma_a[2], 10.f);
-	// tf_control_points[2] = TF1DControlPoint(0.51f, sigma_a[0], 10.f);
+	tf_control_points[0] = TF1DControlPoint(0.06f, sigma_a[1], 2.f, 0.0005f);
+	tf_control_points[1] = TF1DControlPoint(0.1f, sigma_a[2], 2.f, 0.0005f);
+	tf_control_points[2] = TF1DControlPoint(0.17f, sigma_a[0], 2.f, 0.0005f);
+	tf_control_points[3] = TF1DControlPoint(0.27f, sigma_a[3], 10.f, 0.0001f);
 
 	TF1DExp* tf;
 	CUDA_SAFE_CALL(cudaMallocManaged(&tf, sizeof(TF1DExp)));
 	tf->num_points = NUM_CNTRL_POINTS;
-	tf->variance = 0.001f;
 
 	// Compute empty space map
 	bool* empty_space_map;

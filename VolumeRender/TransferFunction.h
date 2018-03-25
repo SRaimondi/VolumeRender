@@ -44,13 +44,15 @@ struct TF1DControlPoint {
 	float value;
 	// Output at this point
 	TFOutput output;
+	// Variance, used in the exponential TF
+	float variance;
 
 	CUDA_HOST TF1DControlPoint()
-		: value(0.f), output() {
+		: value(0.f), output(), variance(0.f) {
 	}
 
-	CUDA_HOST_DEVICE inline TF1DControlPoint(float f_v, const Spectrum &a, float d) noexcept
-		: value(f_v), output(a, d) {
+	CUDA_HOST_DEVICE inline TF1DControlPoint(float f_v, const Spectrum &a, float d, float var = 0.f) noexcept
+		: value(f_v), output(a, d), variance(var) {
 	}
 };
 
@@ -76,11 +78,9 @@ class TF1DExp {
 public:
 	// Number of points in the TF
 	int num_points;
-	// c^2 parameter for Gaussian, square root of variance
-	float variance;
 
-	CUDA_HOST TF1DExp(int n_p, float var_sqr)
-		: num_points(n_p), variance(var_sqr * var_sqr) {
+	CUDA_HOST TF1DExp(int n_p)
+		: num_points(n_p) {
 	}
 
 	// Compute transfer function value at given parameter in [0,1]
